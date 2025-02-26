@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum for User Roles
+enum Role {
+  USER
+  ADMIN
+}
+
+// User Model
+model User {
+  id            String         @id @default(uuid()) // Primary key with UUID
+  email         String         @unique // Unique email field
+  password      String // User password
+  name          String? // Optional user name
+  role          Role           @default(USER) // Role with default USER
+  reviews       Review[] // User's reviews
+  items         Item[] // User's items
+  profile       UserProfile? // User profile (optional)
+  comments      Comment[] // User's comments
+  notifications Notification[] // User's notifications
+}
+
+// Review Model
+model Review {
+  id       String    @id @default(uuid()) // Review ID
+  text     String // Review text
+  rating   Int // Rating between 1 and 5
+  userId   String // Foreign key to User
+  user     User      @relation(fields: [userId], references: [id]) // Foreign key relation to User
+  itemId   String // Foreign key to Item
+  item     Item      @relation(fields: [itemId], references: [id]) // Foreign key relation to Item
+  comments Comment[] // Reviews can have multiple comments
+}
+
+// Comment Model
+model Comment {
+  id       String @id @default(uuid()) // Comment ID
+  text     String // Comment text
+  userId   String // Foreign key to User
+  user     User   @relation(fields: [userId], references: [id]) // Foreign key relation to User
+  reviewId String // Foreign key to Review
+  review   Review @relation(fields: [reviewId], references: [id]) // Foreign key relation to Review
+}
+
+// Notification Model
+model Notification {
+  id     String  @id @default(uuid()) // Notification ID
+  userId String // Foreign key to User
+  user   User    @relation(fields: [userId], references: [id]) // Foreign key relation to User
+  seen   Boolean @default(false) // Seen status
+}
+
+// Item Model
+model Item {
+  id            String   @id @default(uuid()) // Item ID
+  title         String // Item title
+  brand         String // Brand of the item
+  model         String // Model of the item
+  price         Float // Item price
+  description   String? // Item description (optional)
+  strapMaterial String? // Strap material (optional)
+  metalColor    String? // Metal color (optional)
+  movement      String? // Movement type (optional)
+  caseSize      Int? // Case size (optional)
+  userId        String? // Foreign key to User (now optional)
+  user          User?    @relation(fields: [userId], references: [id]) // Foreign key relation to User (optional)
+  Review        Review[]
+}
+
+// UserProfile Model
+model UserProfile {
+  id     String  @id @default(uuid()) // User Profile ID
+  userId String  @unique // Foreign key to User (unique constraint)
+  user   User    @relation(fields: [userId], references: [id]) // Foreign key relation to User
+  bio    String? // Optional bio for the user
+}
