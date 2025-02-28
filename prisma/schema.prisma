@@ -68,7 +68,7 @@ model Item {
   id            String   @id @default(uuid()) // Item ID
   title         String // Item title
   brand         String // Brand of the item
-  model         String // Model of the item
+  model         String   @unique // Make 'model' unique// Model of the item
   price         Float // Item price
   description   String? // Item description (optional)
   strapMaterial String? // Strap material (optional)
